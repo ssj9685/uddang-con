@@ -22,36 +22,36 @@
       </section>
 
       <section>
-        <h3>React.js 이전의 Javascript</h3>
-        <li>절차지향적으로 작성하였다.</li>
-        <li>DOM에 직접 접근하였다.</li>
+        <h3>React.js 이전의 Javascript에서는</h3>
+        <li class="fragment fade-up">DOM에 직접 접근해요</li>
+        <li class="fragment fade-up">절차지향적으로 작성했어요</li>
       </section>
 
       <section>
         <h3>index.html</h3>
         <pre>
-          <code data-line-numbers="0|2|12" class="language-html"><h1>Shopping Cart</h1>
-  <table id="cart-table">
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Total</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="cart-items">
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3">Total:</td>
-        <td id="total-price">$0.00</td>
-        <td></td>
-      </tr>
-    </tfoot>
-  </table>
-  <script src="script.js"></script>
+          <code data-line-numbers="0|2|12|17" class="language-html"><h1>Shopping Cart</h1>
+<table id="cart-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="cart-items">
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">Total:</td>
+      <td id="total-price">$0.00</td>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
+<script src="script.js"></script>
           </code>
         </pre>
       </section>
@@ -59,7 +59,8 @@
       <section>
         <h3>script.js</h3>
         <pre>
-          <code data-line-numbers="0|2-6|13|24-32" class="language-javascript">
+          <code data-line-numbers="0|2-9|13-14|17-19|23-32|34|38-46|57-61" class="language-javascript">
+            <xmp>
             // 상품 정보
             const products = [
             { id: 1, name: 'Product 1', price: 10.00 },
@@ -81,13 +82,13 @@
               totalPrice += totalItemPrice;
             
               const row = document.createElement('tr');
-              row.innerHTML = <xmp>`
+              row.innerHTML = `
               <td>${product.name}</td>
               <td>${product.price.toFixed(2)}</td>
               <td>${item.quantity}</td>
               <td>${totalItemPrice.toFixed(2)}</td>
               <td><button onclick="removeFromCart(${item.id})">Remove</button></td>
-              `</xmp>;
+              `;
         cartItemsElement.appendChild(row);
         }
 
@@ -119,8 +120,15 @@
         addToCart(2);
         addToCart(3);
         addToCart(2);
+        </xmp>
         </code>
         </pre>
+      </section>
+
+      <section>
+        <h3>이런 문제가 있어요</h3>
+        <li class="fragment fade-up">관심사 분리</li>
+        <li class="fragment fade-up">중복 코드 발생</li>
       </section>
 
       <section>
@@ -128,8 +136,10 @@
       </section>
 
       <section>
+        <h3>프로토타입 활용</h3>
         <pre>
           <code data-line-numbers class="language-javascript">
+            <xmp>
             function Product(id, name, price) {
             this.id = id;
             this.name = name;
@@ -190,85 +200,9 @@
             
             // Remove a product from the cart
             cart.removeItem(products[1]);
+            </xmp>
           </code>
         </pre>
-      </section>
-
-      <section>
-        <h3>Calculate Area</h3>
-        <pre>
-          <code class="language-javascript">
-            function calculateArea(length, width) {
-              const area = length * width;
-              return area;
-            }
-        </code>
-      </pre>
-        <div data-autoslide="5000"></div>
-      </section>
-      <section>
-        <h3>Calculate Perimeter</h3>
-        <pre><code class="language-javascript">
-          function calculatePerimeter(length, width) {
-            const perimeter = 2 * (length + width);
-            return perimeter;
-          }
-        </code></pre>
-      </section>
-      <section data-auto-animate>
-        <h3>Calculate Diagonal</h3>
-        <pre data-id="code">
-          <code class="language-javascript">
-            function main() {
-              const length = 5;
-              const width = 3;
-              
-              return {
-                //...
-              }
-            }
-        
-          main();
-        </code>
-      </pre>
-      </section>
-
-      <section data-auto-animate>
-        <h3>Main Function</h3>
-        <pre data-id="code">
-          <code data-line-numbers="5-7|9-11|13-15|21-22" data-noescape class="language-javascript">
-            function main() {
-        const length = 5;
-        const width = 3;
-
-        const area = calculateArea(length, width);
-        const perimeter = calculatePerimeter(length, width);
-        const diagonal = calculateDiagonal(length, width);
-
-        console.log(`Area: ${area}`);
-        console.log(`Perimeter: ${perimeter}`);
-        console.log(`Diagonal: ${diagonal}`);
-
-        const area = calculateArea(length, width);
-        const perimeter = calculatePerimeter(length, width);
-        const diagonal = calculateDiagonal(length, width);
-        
-        console.log(`Area: ${area}`);
-        console.log(`Perimeter: ${perimeter}`);
-        console.log(`Diagonal: ${diagonal}`);
-
-        const area = calculateArea(length, width);
-        const perimeter = calculatePerimeter(length, width);
-        const diagonal = calculateDiagonal(length, width);
-        
-        console.log(`Area: ${area}`);
-        console.log(`Perimeter: ${perimeter}`);
-        console.log(`Diagonal: ${diagonal}`);
-      }
-
-      main();
-    </code>
-      </pre>
       </section>
     </div>
   </div>
@@ -278,12 +212,12 @@
         return prettier.format(code, {
           parser: "babel",
           plugins: prettierPlugins,
-          printWidth: 80,
+          printWidth: 120,
           tabWidth: 4,
           useTabs: false,
           semi: true,
           singleQuote: true,
-          trailingComma: "es5",
+          trailingComma: "all",
         });
       } catch (error) {
         console.error("Prettier formatting failed:", error);
