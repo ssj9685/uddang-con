@@ -29,9 +29,9 @@
       </section>
 
       <section>
-        <h3>index.html</h3>
+        <h3>쇼핑몰</h3>
         <pre>
-          <code data-line-numbers="0|2|12|17" class="language-html"><h1>Shopping Cart</h1>
+          <code data-line-numbers="0|1|2|12|17" class="language-html"><div id="product-list"></div>
 <table id="cart-table">
   <thead>
     <tr>
@@ -57,69 +57,89 @@
       </section>
 
       <section>
-        <h3>script.js</h3>
+        <h3>절차지향적 코드</h3>
         <pre>
-          <code data-line-numbers="0|2-9|13-14|17-32|34|38-46|57-61" class="language-javascript">
+          <code data-line-numbers="0|1-7|10-11|14-38|15-23|25-34|37|40-48|50-56|58|61-72|74-78" class="language-javascript">
             <xmp>
-            // 상품 정보
             const products = [
             { id: 1, name: 'Product 1', price: 10.00 },
             { id: 2, name: 'Product 2', price: 15.00 },
             { id: 3, name: 'Product 3', price: 20.00 }
             ];
             
-            // 장바구니 데이터
             let cart = [];
             
-            // 장바구니 테이블 업데이트
             function updateCartTable() {
             const cartItemsElement = document.getElementById('cart-items');
             cartItemsElement.innerHTML = '';
             
             let totalPrice = 0;
-            for (let i = 0; i < cart.length; i++) { const item=cart[i]; const product=products.find(p=> p.id === item.id);
+            for (let i = 0; i < cart.length; i++) {
+              const item=cart[i];
+              const product=products.find(p=> p.id === item.product.id);
               const totalItemPrice = product.price * item.quantity;
               totalPrice += totalItemPrice;
             
               const row = document.createElement('tr');
+              const removeButton = document.createElement('button');
+              removeButton.textContent = 'Remove';
+              removeButton.addEventListener('click', () => removeFromCart(product));
+
               row.innerHTML = `
               <td>${product.name}</td>
               <td>${product.price.toFixed(2)}</td>
-              <td>${item.quantity}</td>
+              <td>${item.product.quantity}</td>
               <td>${totalItemPrice.toFixed(2)}</td>
-              <td><button onclick="removeFromCart(${item.id})">Remove</button></td>
+              <td></td>
               `;
+
+              row.lastElementChild.appendChild(removeButton);
         cartItemsElement.appendChild(row);
         }
 
         document.getElementById('total-price').textContent = `${totalPrice.toFixed(2)}`;
         }
 
-        // 장바구니에 상품 추가
-        function addToCart(id) {
-        const existingItem = cart.find(item => item.id === id);
+        function addToCart(product, quantity) {
+        const existingItem = cart.find(item => item.product.id === product.id);
         if (existingItem) {
-        existingItem.quantity++;
+        existingItem.quantity += quantity;
         } else {
-        cart.push({ id, quantity: 1 });
+        cart.push({ product, quantity: 1 });
         }
         updateCartTable();
         }
 
-        // 장바구니에서 상품 삭제
-        function removeFromCart(id) {
-        const index = cart.findIndex(item => item.id === id);
+        function removeFromCart(product) {
+        const index = cart.findIndex(item => item.product.id === product.id);
         if (index !== -1) {
         cart.splice(index, 1);
         updateCartTable();
         }
         }
 
-        // 예시 사용법
-        addToCart(1);
-        addToCart(2);
-        addToCart(3);
-        addToCart(2);
+        const productListElement = document.getElementById('product-list');
+        
+        for (const product of products) {
+        const productItem = document.createElement('div');
+        productItem.classList.add('product-item');
+        
+        const productName = document.createElement('h3');
+        productName.textContent = product.name;
+        
+        const productPrice = document.createElement('p');
+        productPrice.textContent = `Price: $${product.price.toFixed(2)}`;
+        
+        const addToCartButton = document.createElement('button');
+        addToCartButton.textContent = 'Add to Cart';
+        addToCartButton.addEventListener('click', () => addToCart(product, 1));
+        
+        productItem.appendChild(productName);
+        productItem.appendChild(productPrice);
+        productItem.appendChild(addToCartButton);
+        
+        productListElement.appendChild(productItem);
+        }
         </xmp>
         </code>
         </pre>
@@ -127,9 +147,9 @@
 
       <section>
         <h3>이런 문제가 있어요</h3>
-        <div class="fragment fade-up">중복 코드가 발생했어요</div>
-        <div class="fragment fade-up">관심사 분리가 되어있지 않아요</div>
-        <div class="fragment fade-up">데이터와 로직이 혼재되었어요</div>
+        <div class="fragment fade-up">함수명 선언할 때 반복이 있어요</div>
+        <div class="fragment fade-up">같은 파일 내의 누구나 변수에 접근할 수 있어요</div>
+        <div class="fragment fade-up">책임이 명확하지 않아 디버깅이 어려질 수 있어요</div>
       </section>
 
       <section>
@@ -137,9 +157,9 @@
       </section>
 
       <section>
-        <h3>프로토타입으로 클래스처럼</h3>
+        <h3>프로토타입을 활용</h3>
         <pre>
-          <code data-line-numbers class="language-javascript">
+          <code data-line-numbers="0|1-5|7-9|11-19|21-27|29-49|51-62|85-93" class="language-javascript">
             <xmp>
             function Product(id, name, price) {
             this.id = id;
@@ -158,34 +178,73 @@
             } else {
             this.items.push({ product, quantity });
             }
-            this.updateCartTable();
+            this.updateTable();
             };
             
             Cart.prototype.removeItem = function(product) {
             const index = this.items.findIndex(item => item.product.id === product.id);
             if (index !== -1) {
             this.items.splice(index, 1);
-            this.updateCartTable();
+            this.updateTable();
             }
             };
             
-            Cart.prototype.updateCartTable = function() {
+            Cart.prototype.updateTable = function() {
             const tableBody = document.getElementById('cart-table-body');
             tableBody.innerHTML = '';
             
             for (const { product, quantity } of this.items) {
             const row = document.createElement('tr');
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => this.removeItem(product));
+
             row.innerHTML = `
             <td>${product.name}</td>
             <td>${quantity}</td>
             <td>${product.price * quantity}</td>
-            <td><button class="remove-btn">Remove</button></td>
+            <td></td>
             `;
+
+            row.lastElementChild.appendChild(removeButton);
             tableBody.appendChild(row);
             }
             };
+
+            function ProductListRenderer(cart, products) {
+            this.cart = cart;
+            this.products = products;
+            this.productListElement = document.getElementById('product-list');
+            }
             
-            // Usage
+            ProductListRenderer.prototype.renderProducts = function() {
+            for (const product of this.products) {
+            const productItem = this.createProductItem(product);
+            this.productListElement.appendChild(productItem);
+            }
+            };
+            
+            ProductListRenderer.prototype.createProductItem = function(product) {
+            const productItem = document.createElement('div');
+            productItem.classList.add('product-item');
+            
+            const productName = document.createElement('h3');
+            productName.textContent = product.name;
+            
+            const productPrice = document.createElement('p');
+            productPrice.textContent = `Price: $${product.price.toFixed(2)}`;
+            
+            const addToCartButton = document.createElement('button');
+            addToCartButton.textContent = 'Add to Cart';
+            addToCartButton.addEventListener('click', () => this.cart.addItem(product, 1));
+            
+            productItem.appendChild(productName);
+            productItem.appendChild(productPrice);
+            productItem.appendChild(addToCartButton);
+            
+            return productItem;
+            };
+            
             const products = [
             new Product(1, 'Product 1', 10.99),
             new Product(2, 'Product 2', 15.99),
@@ -193,17 +252,658 @@
             ];
             
             const cart = new Cart();
-            
-            // Add products to the cart
-            cart.addItem(products[0], 2);
-            cart.addItem(products[1], 1);
-            cart.addItem(products[2], 1);
-            
-            // Remove a product from the cart
-            cart.removeItem(products[1]);
+            const productListRenderer = new ProductListRenderer(cart, products);
+            productListRenderer.renderProducts();
             </xmp>
           </code>
         </pre>
+      </section>
+
+      <section>
+        <h3>아쉬운 점이 있네요</h3>
+        <div class="fragment fade-up">선언부에 반복이 있어요</div>
+        <div class="fragment fade-up">어디서든 메서드를 선언할 수 있어요</div>
+        <div class="fragment fade-up">응집도가 낮아질 수 있어요</div>
+      </section>
+
+      <section>
+        <h3>Class</h3>
+        <pre>
+          <code data-line-numbers="" class="language-javascript">
+            <xmp>
+            class Product {
+            constructor(id, name, price) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+            }
+            }
+            
+            class Cart {
+            constructor() {
+            this.items = [];
+            }
+            
+            addItem(product, quantity) {
+            const existingItem = this.items.find(item => item.product.id === product.id);
+            if (existingItem) {
+            existingItem.quantity += quantity;
+            } else {
+            this.items.push({ product, quantity });
+            }
+            this.updateCartTable();
+            }
+            
+            removeItem(product) {
+            const index = this.items.findIndex(item => item.product.id === product.id);
+            if (index !== -1) {
+            this.items.splice(index, 1);
+            this.updateCartTable();
+            }
+            }
+            
+            updateCartTable() {
+            const tableBody = document.getElementById('cart-table-body');
+            tableBody.innerHTML = '';
+            
+            for (const { product, quantity } of this.items) {
+            const row = document.createElement('tr');
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => removeFromCart(product));
+
+            row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${quantity}</td>
+            <td>${product.price * quantity}</td>
+            <td></td>
+            `;
+
+            row.lastElementChild.appendChild(removeButton);
+            tableBody.appendChild(row);
+            }
+            }
+            }
+
+            class ProductListRenderer {
+            constructor(cart, products) {
+            this.cart = cart;
+            this.products = products;
+            this.productListElement = document.getElementById('product-list');
+            }
+            
+            renderProducts() {
+            for (const product of this.products) {
+            const productItem = this.createProductItem(product);
+            this.productListElement.appendChild(productItem);
+            }
+            }
+            
+            createProductItem(product) {
+            const productItem = document.createElement('div');
+            productItem.classList.add('product-item');
+            
+            const productName = document.createElement('h3');
+            productName.textContent = product.name;
+            
+            const productPrice = document.createElement('p');
+            productPrice.textContent = `Price: $${product.price.toFixed(2)}`;
+            
+            const addToCartButton = document.createElement('button');
+            addToCartButton.textContent = 'Add to Cart';
+            addToCartButton.addEventListener('click', () => this.cart.addItem(product, 1));
+            
+            productItem.appendChild(productName);
+            productItem.appendChild(productPrice);
+            productItem.appendChild(addToCartButton);
+            
+            return productItem;
+            }
+            }
+            
+            const products = [
+            new Product(1, 'Product 1', 10.99),
+            new Product(2, 'Product 2', 15.99),
+            new Product(3, 'Product 3', 20.99),
+            ];
+            
+            const cart = new Cart();
+            const productListRenderer = new ProductListRenderer(cart, products);
+            productListRenderer.renderProducts();
+            </xmp>
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>전반적으로 아쉬운 점이 있어요</h3>
+        <div class="fragment fade-up">코드를 재사용하기가 어려워요</div>
+        <div class="fragment fade-up">DOM을 직접 조작하는 과정에서 코드가 복잡해져요</div>
+        <div class="fragment fade-up">변수의 상태를 관리하기 어려워요</div>
+      </section>
+
+      <section>
+        <h3>React.js Class 컴포넌트</h3>
+        <pre>
+          <code data-line-numbers="" class="language-javascript">
+            <xmp>
+              import React, { Component } from 'react';
+              
+              class Product {
+              constructor(id, name, price) {
+              this.id = id;
+              this.name = name;
+              this.price = price;
+              }
+              }
+              
+              class ProductListItem extends Component {
+              handleAddToCart = () => {
+              this.props.onAddToCart(this.props.product, 1);
+              }
+              
+              render() {
+              const { product } = this.props;
+              return (
+              <div>
+                <h3>{product.name}</h3>
+                <p>Price: ${product.price.toFixed(2)}</p>
+                <button onClick={this.handleAddToCart}>Add to Cart</button>
+              </div>
+              );
+              }
+              }
+              
+              class ProductList extends Component {
+              render() {
+              const { products, onAddToCart } = this.props;
+              return (
+              <div>
+                {products.map(product => (
+                <ProductListItem key={product.id} product={product} onAddToCart={onAddToCart} />
+                ))}
+              </div>
+              );
+              }
+              }
+              
+              class Cart extends Component {
+              render() {
+              const { items, onRemoveItem } = this.props;
+              return (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(({ product, quantity }) => (
+                  <tr key={product.id}>
+                    <td>{product.name}</td>
+                    <td>{quantity}</td>
+                    <td>{product.price * quantity}</td>
+                    <td>
+                      <button onClick={()=> onRemoveItem(product)}>Remove</button>
+                    </td>
+                  </tr>
+                  ))}
+                </tbody>
+              </table>
+              );
+              }
+              }
+              
+              class App extends Component {
+              constructor(props) {
+              super(props);
+              this.state = {
+              products: [
+              new Product(1, 'Product 1', 10.99),
+              new Product(2, 'Product 2', 15.99),
+              new Product(3, 'Product 3', 20.99),
+              ],
+              cart: {
+              items: []
+              }
+              };
+              }
+              
+              handleAddToCart = (product, quantity) => {
+              const existingItem = this.state.cart.items.find(item => item.product.id === product.id);
+              if (existingItem) {
+              existingItem.quantity += quantity;
+              } else {
+              this.setState(prevState => ({
+              cart: {
+              items: [...prevState.cart.items, { product, quantity }]
+              }
+              }));
+              }
+              }
+              
+              handleRemoveItem = (product) => {
+              this.setState(prevState => ({
+              cart: {
+              items: prevState.cart.items.filter(item => item.product.id !== product.id)
+              }
+              }));
+              }
+              
+              render() {
+              return (
+              <div>
+                <ProductList products={this.state.products} onAddToCart={this.handleAddToCart} />
+                <Cart items={this.state.cart.items} onRemoveItem={this.handleRemoveItem} />
+              </div>
+              );
+              }
+              }
+              
+              export default App;
+            </xmp>
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>아쉬운 점이 있어요</h3>
+        <div class="fragment fade-up">클래스 특유의 보일러플레이트 코드가 생겼어요</div>
+      </section>
+
+      <section>
+        <h3>React.js Function 컴포넌트</h3>
+        <pre>
+          <code data-line-numbers="" class="language-javascript">
+            <xmp>
+              import React, { useState } from 'react';
+              
+              class Product {
+              constructor(id, name, price) {
+              this.id = id;
+              this.name = name;
+              this.price = price;
+              }
+              }
+              
+              const ProductListItem = ({ product, onAddToCart }) => {
+              const handleAddToCart = () => {
+              onAddToCart(product, 1);
+              };
+              
+              return (
+              <div>
+                <h3>{product.name}</h3>
+                <p>Price: ${product.price.toFixed(2)}</p>
+                <button onClick={handleAddToCart}>Add to Cart</button>
+              </div>
+              );
+              };
+              
+              const ProductList = ({ products, onAddToCart }) => {
+              return (
+              <div>
+                {products.map(product => (
+                <ProductListItem key={product.id} product={product} onAddToCart={onAddToCart} />
+                ))}
+              </div>
+              );
+              };
+              
+              const Cart = ({ items, onRemoveItem }) => {
+              return (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(({ product, quantity }) => (
+                  <tr key={product.id}>
+                    <td>{product.name}</td>
+                    <td>{quantity}</td>
+                    <td>{product.price * quantity}</td>
+                    <td>
+                      <button onClick={()=> onRemoveItem(product)}>Remove</button>
+                    </td>
+                  </tr>
+                  ))}
+                </tbody>
+              </table>
+              );
+              };
+              
+              const App = () => {
+              const [products, setProducts] = useState([
+              new Product(1, 'Product 1', 10.99),
+              new Product(2, 'Product 2', 15.99),
+              new Product(3, 'Product 3', 20.99),
+              ]);
+              
+              const [cart, setCart] = useState({
+              items: [],
+              });
+              
+              const handleAddToCart = (product, quantity) => {
+              const existingItem = cart.items.find(item => item.product.id === product.id);
+              if (existingItem) {
+              existingItem.quantity += quantity;
+              setCart(prevState => ({
+              items: [...prevState.items],
+              }));
+              } else {
+              setCart(prevState => ({
+              items: [...prevState.items, { product, quantity }],
+              }));
+              }
+              };
+              
+              const handleRemoveItem = product => {
+              setCart(prevState => ({
+              items: prevState.items.filter(item => item.product.id !== product.id),
+              }));
+              };
+              
+              return (
+              <div>
+                <ProductList products={products} onAddToCart={handleAddToCart} />
+                <Cart items={cart.items} onRemoveItem={handleRemoveItem} />
+              </div>
+              );
+              };
+              
+              export default App;
+            </xmp>
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>공통적으로 아쉬운 점이 있어요</h3>
+        <div class="fragment fade-up">부모에 상태와 로직이 종속적이에요</div>
+        <div class="fragment fade-up">다시 재사용하기가 어려워졌어요</div>
+      </section>
+
+      <section>
+        <h3>useSyncExternalStore</h3>
+        <pre>
+          <code data-line-numbers="" class="language-javascript">
+            <xmp>
+              class ProductStore {
+              static instance = null;
+              
+              constructor() {
+              if (ProductStore.instance) {
+              return ProductStore.instance;
+              }
+              
+              this.products = [
+              { id: 1, name: 'Product 1', price: 10 },
+              { id: 2, name: 'Product 2', price: 20 },
+              { id: 3, name: 'Product 3', price: 30 },
+              ];
+              this.cartItems = [];
+              this.subscribers = new Set();
+              
+              ProductStore.instance = this;
+              }
+              
+              getProducts() {
+              return this.products;
+              }
+              
+              getCartItems() {
+              return this.cartItems;
+              }
+              
+              addToCart(product, quantity) {
+              const existingItem = this.cartItems.find((item) => item.product.id === product.id);
+              if (existingItem) {
+              existingItem.quantity += quantity;
+              } else {
+              this.cartItems.push({ product, quantity });
+              }
+              this.notifySubscribers();
+              }
+              
+              removeFromCart(product) {
+              const itemIndex = this.cartItems.findIndex((item) => item.product.id === product.id);
+              if (itemIndex !== -1) {
+              this.cartItems.splice(itemIndex, 1);
+              this.notifySubscribers();
+              }
+              }
+              
+              subscribe(callback) {
+              this.subscribers.add(callback);
+              return () => this.unsubscribe(callback);
+              }
+              
+              unsubscribe(callback) {
+              this.subscribers.delete(callback);
+              }
+              
+              notifySubscribers() {
+              this.subscribers.forEach((subscriber) => subscriber());
+              }
+              }
+              
+              
+              const ProductList = () => {
+              const store = new ProductStore();
+              const products = useSyncExternalStore(store.subscribe, store.getProducts);
+              
+              const handleAddToCart = (product, quantity) => {
+              store.addToCart(product, quantity);
+              };
+              
+              return (
+              <div>
+                {products.map((product) => (
+                <ProductListItem key={product.id} product={product} onAddToCart={handleAddToCart} />
+                ))}
+              </div>
+              );
+              };
+              
+              const ProductListItem = ({ product, onAddToCart }) => {
+              const handleAddToCart = () => {
+              onAddToCart(product, 1);
+              };
+              
+              return (
+              <div>
+                <h3>{product.name}</h3>
+                <p>Price: ${product.price}</p>
+                <button onClick={handleAddToCart}>Add to Cart</button>
+              </div>
+              );
+              };
+              
+              const Cart = () => {
+              const store = new ProductStore();
+              const cartItems = useSyncExternalStore(store.subscribe, store.getCartItems);
+              
+              const handleRemoveFromCart = (product) => {
+              store.removeFromCart(product);
+              };
+              
+              return (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.product.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.product.price * item.quantity}</td>
+                    <td>
+                      <button onClick={()=> handleRemoveFromCart(item.product)}>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                  ))}
+                </tbody>
+              </table>
+              );
+              };
+              
+              const App = () => {
+              return (
+              <>
+                <ProductList />
+                <Cart />
+              </>
+              );
+              };
+              
+              export default App;
+            </xmp>
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>아쉬운 점이 있어요</h3>
+        <div class="fragment fade-up">다시 보일러플레이트 코드가 생성됐어요</div>
+      </section>
+
+      <section>
+        <h3>Valtio</h3>
+        <pre>
+                <code data-line-numbers="" class="language-javascript">
+                  <xmp>
+                    import { proxy, useSnapshot } from 'valtio';
+                    
+                    class Store {
+                    static instance = null;
+                    
+                    state = proxy({
+                    products: [
+                    { id: 1, name: 'Product 1', price: 10 },
+                    { id: 2, name: 'Product 2', price: 20 },
+                    { id: 3, name: 'Product 3', price: 30 },
+                    ],
+                    cartItems: [],
+                    });
+                    
+                    static getInstance() {
+                    if (!Store.instance) {
+                    Store.instance = new Store();
+                    }
+                    return Store.instance;
+                    }
+                    
+                    addToCart(product, quantity) {
+                    const existingItem = this.state.cartItems.find((item) => item.product.id === product.id);
+                    if (existingItem) {
+                    existingItem.quantity += quantity;
+                    } else {
+                    this.state.cartItems.push({ product, quantity });
+                    }
+                    }
+                    
+                    removeFromCart(product) {
+                    const itemIndex = this.state.cartItems.findIndex((item) => item.product.id === product.id);
+                    if (itemIndex !== -1) {
+                    this.state.cartItems.splice(itemIndex, 1);
+                    }
+                    }
+                    }
+                    
+                    const ProductList = () => {
+                    const store = Store.getInstance();
+                    const { products } = useSnapshot(store.state);
+                    
+                    const handleAddToCart = (product, quantity) => {
+                    store.addToCart(product, quantity);
+                    };
+                    
+                    return (
+                    <div>
+                      {products.map((product) => (
+                      <ProductListItem key={product.id} product={product} onAddToCart={handleAddToCart} />
+                      ))}
+                    </div>
+                    );
+                    };
+                    
+                    const ProductListItem = ({ product, onAddToCart }) => {
+                    const handleAddToCart = () => {
+                    onAddToCart(product, 1);
+                    };
+                    
+                    return (
+                    <div>
+                      <h3>{product.name}</h3>
+                      <p>Price: ${product.price}</p>
+                      <button onClick={handleAddToCart}>Add to Cart</button>
+                    </div>
+                    );
+                    };
+                    
+                    const Cart = () => {
+                    const store = Store.getInstance();
+                    const { cartItems } = useSnapshot(store.state);
+                    
+                    const handleRemoveFromCart = (product) => {
+                    store.removeFromCart(product);
+                    };
+                    
+                    return (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Quantity</th>
+                          <th>Price</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cartItems.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.product.name}</td>
+                          <td>{item.quantity}</td>
+                          <td>{item.product.price * item.quantity}</td>
+                          <td>
+                            <button onClick={()=> handleRemoveFromCart(item.product)}>Remove</button>
+                          </td>
+                        </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    );
+                    };
+                    
+                    const App = () => {
+                    return (
+                    <>
+                      <ProductList />
+                      <Cart />
+                    </>
+                    );
+                    };
+                    
+                    export default App;
+                  </xmp>
+                </code>
+              </pre>
       </section>
     </div>
   </div>
