@@ -22,6 +22,179 @@
       </section>
 
       <section>
+        <h3>React.js 이전의 Javascript</h3>
+        <li>절차지향적으로 작성하였다.</li>
+        <li>DOM에 직접 접근하였다.</li>
+      </section>
+
+      <section>
+        <h3>index.html</h3>
+        <pre>
+          <code data-line-numbers="0|2|12" class="language-html"><h1>Shopping Cart</h1>
+  <table id="cart-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="cart-items">
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Total:</td>
+        <td id="total-price">$0.00</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  <script src="script.js"></script>
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>script.js</h3>
+        <pre>
+          <code data-line-numbers="0|2-6|13|24-32" class="language-javascript">
+            // 상품 정보
+            const products = [
+            { id: 1, name: 'Product 1', price: 10.00 },
+            { id: 2, name: 'Product 2', price: 15.00 },
+            { id: 3, name: 'Product 3', price: 20.00 }
+            ];
+            
+            // 장바구니 데이터
+            let cart = [];
+            
+            // 장바구니 테이블 업데이트
+            function updateCartTable() {
+            const cartItemsElement = document.getElementById('cart-items');
+            cartItemsElement.innerHTML = '';
+            
+            let totalPrice = 0;
+            for (let i = 0; i < cart.length; i++) { const item=cart[i]; const product=products.find(p=> p.id === item.id);
+              const totalItemPrice = product.price * item.quantity;
+              totalPrice += totalItemPrice;
+            
+              const row = document.createElement('tr');
+              row.innerHTML = <xmp>`
+              <td>${product.name}</td>
+              <td>${product.price.toFixed(2)}</td>
+              <td>${item.quantity}</td>
+              <td>${totalItemPrice.toFixed(2)}</td>
+              <td><button onclick="removeFromCart(${item.id})">Remove</button></td>
+              `</xmp>;
+        cartItemsElement.appendChild(row);
+        }
+
+        document.getElementById('total-price').textContent = `${totalPrice.toFixed(2)}`;
+        }
+
+        // 장바구니에 상품 추가
+        function addToCart(id) {
+        const existingItem = cart.find(item => item.id === id);
+        if (existingItem) {
+        existingItem.quantity++;
+        } else {
+        cart.push({ id, quantity: 1 });
+        }
+        updateCartTable();
+        }
+
+        // 장바구니에서 상품 삭제
+        function removeFromCart(id) {
+        const index = cart.findIndex(item => item.id === id);
+        if (index !== -1) {
+        cart.splice(index, 1);
+        updateCartTable();
+        }
+        }
+
+        // 예시 사용법
+        addToCart(1);
+        addToCart(2);
+        addToCart(3);
+        addToCart(2);
+        </code>
+        </pre>
+      </section>
+
+      <section>
+        <h3>절차지향에서 객체지향으로</h3>
+      </section>
+
+      <section>
+        <pre>
+          <code data-line-numbers class="language-javascript">
+            function Product(id, name, price) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+            }
+            
+            function Cart() {
+            this.items = [];
+            }
+            
+            Cart.prototype.addItem = function(product, quantity) {
+            const existingItem = this.items.find(item => item.product.id === product.id);
+            if (existingItem) {
+            existingItem.quantity += quantity;
+            } else {
+            this.items.push({ product, quantity });
+            }
+            this.updateCartTable();
+            };
+            
+            Cart.prototype.removeItem = function(product) {
+            const index = this.items.findIndex(item => item.product.id === product.id);
+            if (index !== -1) {
+            this.items.splice(index, 1);
+            this.updateCartTable();
+            }
+            };
+            
+            Cart.prototype.updateCartTable = function() {
+            const tableBody = document.getElementById('cart-table-body');
+            tableBody.innerHTML = '';
+            
+            for (const { product, quantity } of this.items) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${quantity}</td>
+            <td>${product.price * quantity}</td>
+            <td><button class="remove-btn">Remove</button></td>
+            `;
+            tableBody.appendChild(row);
+            }
+            };
+            
+            // Usage
+            const products = [
+            new Product(1, 'Product 1', 10.99),
+            new Product(2, 'Product 2', 15.99),
+            new Product(3, 'Product 3', 20.99),
+            ];
+            
+            const cart = new Cart();
+            
+            // Add products to the cart
+            cart.addItem(products[0], 2);
+            cart.addItem(products[1], 1);
+            cart.addItem(products[2], 1);
+            
+            // Remove a product from the cart
+            cart.removeItem(products[1]);
+          </code>
+        </pre>
+      </section>
+
+      <section>
         <h3>Calculate Area</h3>
         <pre>
           <code class="language-javascript">
