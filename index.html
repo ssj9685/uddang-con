@@ -4,14 +4,13 @@
 <head>
   <meta charset="utf-8">
   <title>자바스크립트에서 Class를 추구하면 안될까?</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js"></script>
-  <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
-  <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
+  <link rel="stylesheet" href="reveal.min.css">
+  <link rel="stylesheet" href="black.min.css">
+  <link rel="stylesheet" href="monokai-sublime.min.css">
+  <script src="reveal.min.js"></script>
+  <script src="highlight.min.js"></script>
+  <script src="standalone.js"></script>
+  <script src="parser-babel.js"></script>
 </head>
 
 <body>
@@ -23,8 +22,10 @@
 
       <section>
         <h3>React.js 이전의 Javascript에서는</h3>
-        <li class="fragment fade-up">DOM에 직접 접근해요</li>
-        <li class="fragment fade-up">절차지향적으로 작성했어요</li>
+        <div class="fragment fade-up">DOM에 직접 접근했어요</div>
+        <div class="fragment fade-up">절차지향적으로 작성했어요</div>
+        <div class="fragment fade-up">명령형으로 작성했어요</div>
+        <div class="fragment fade-up">...</div>
       </section>
 
       <section>
@@ -51,7 +52,6 @@
     </tr>
   </tfoot>
 </table>
-<script src="script.js"></script>
           </code>
         </pre>
       </section>
@@ -59,7 +59,7 @@
       <section>
         <h3>script.js</h3>
         <pre>
-          <code data-line-numbers="0|2-9|13-14|17-19|23-32|34|38-46|57-61" class="language-javascript">
+          <code data-line-numbers="0|2-9|13-14|17-32|34|38-46|57-61" class="language-javascript">
             <xmp>
             // 상품 정보
             const products = [
@@ -127,8 +127,9 @@
 
       <section>
         <h3>이런 문제가 있어요</h3>
-        <li class="fragment fade-up">관심사 분리</li>
-        <li class="fragment fade-up">중복 코드 발생</li>
+        <div class="fragment fade-up">중복 코드가 발생했어요</div>
+        <div class="fragment fade-up">관심사 분리가 되어있지 않아요</div>
+        <div class="fragment fade-up">데이터와 로직이 혼재되었어요</div>
       </section>
 
       <section>
@@ -136,7 +137,7 @@
       </section>
 
       <section>
-        <h3>프로토타입 활용</h3>
+        <h3>프로토타입으로 클래스처럼</h3>
         <pre>
           <code data-line-numbers class="language-javascript">
             <xmp>
